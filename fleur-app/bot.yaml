@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bot
+  labels:
+    name: bot
+    k8s-app: fleur
+spec:
+  replicas: 1
+  revisionHistoryLimit: 25
+  template:
+    metadata:
+      labels:
+        name: bot
+        k8s-app: fleur
+    spec:
+      containers:
+      - name: fleur
+        image: index.docker.io/blaaast/fleur:12
+        env:
+        - name: SLACK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: fleur-app-bot
+              key: SLACK_TOKEN
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: fleur-app-bot
+              key: REDIS_URL
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 10m
+            memory: 512Mi
+        # This setting makes nodes pull the docker image every time before
+        # starting the pod. This is useful when debugging, but should be turned
+        # off in production.
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: docker-registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bot
+  labels:
+    name: bot
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    name: bot

@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: couchdb001
+spec:
+  rules:
+  - host: couchdb.fleur.ai
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: couchdb001-backend
+          servicePort: 5984
+      - path: /admin
+        backend:
+          serviceName: couchdb001-backend
+          servicePort: 5986

@@ -1,13 +1,13 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: nlp-api
+  name: bot
 spec:
   rules:
-  - host: nlp-api.fleur.ai
+  - host: bot.fleur.ai
     http:
       paths:
       - path: /
         backend:
-          serviceName: frontend
+          serviceName: bot
           servicePort: 80

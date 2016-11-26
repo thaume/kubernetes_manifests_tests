@@ -14,7 +14,7 @@ spec:
     - port: 443
       name: https
   externalIPs:
-    - 62.210.116.206
+    - 163.172.63.141
 ---
 apiVersion: v1
 kind: Service
@@ -41,22 +41,25 @@ data:
     [entryPoints]
       [entryPoints.http]
       address = ":80"
+      [entryPoints.http.redirect]
+        entryPoint = "https"
       [entryPoints.https]
       address = ":443"
       [entryPoints.https.tls]
-        #[[entryPoints.https.tls.certificates]]
-        #CertFile = "/ssl/tls.crt"
-        #KeyFile = "/ssl/tls.key"
+    [web]
+      address = ":8080"
+      [web.auth.basic]
+        users = ["thaume:$2y$05$K9p8WX4/MreHFxfm16zlc.WqCwQMYmU33GW1.TEIR8KhEWQ21HKHu"]
     [acme]
-    email = "tom@blaaast.co"
-    storage = "/acme/acme.json"
-    entryPoint = "https"
-    onDemand = true
-    onHostRule = true
-    caServer = "https://acme-staging.api.letsencrypt.org/directory"
-    [[acme.domains]]
-    main = "fleur.ai"
-    sans = ["nlp-api.fleur.ai"]
+      email = "tom@blaaast.co"
+      storage = "/acme/acme.json"
+      entryPoint = "https"
+      onDemand = true
+      onHostRule = true
+      caServer = "https://acme-v01.api.letsencrypt.org/directory"
+      [[acme.domains]]
+        main = "fleur.ai"
+        sans = ["bot.fleur.ai", "lb.fleur.ai"]
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -82,7 +85,7 @@ spec:
           hostPath:
             path: /srv/configs/acme/acme.json
       containers:
-        - image: containous/traefik:experimental
+        - image: containous/traefik:k8s
           name: traefik-ingress-lb
           imagePullPolicy: Always
           volumeMounts:
@@ -98,6 +101,5 @@ spec:
             - containerPort: 8080
           args:
             - --configfile=/config/traefik.toml
-            - --web
             - --kubernetes
-            - --logLevel=DEBUG
+            - --logLevel=ERROR
