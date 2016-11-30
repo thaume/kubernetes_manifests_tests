@@ -10,21 +10,37 @@ spec:
     metadata:
       labels:
         name: mongo
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "sysctl",
+            "image": "busybox",
+            "command": ["sysctl", "-w", "vm.max_map_count=262144"],
+            "securityContext": {
+              "privileged": true
+            }
+          }
+        ]'
     spec:
       containers:
       - image: mongo
         name: mongo
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - IPC_LOCK
         ports:
         - name: mongo
           containerPort: 27017
           hostPort: 27017
         volumeMounts:
-          - name: mongo-persistent-storage
-            mountPath: /var/lib/mongodb/data
+        - name: storage
+          mountPath: /data
       volumes:
-        - name: mongo-persistent-storage
-          persistentVolumeClaim:
-            claimName: mongo-data-claim
+        - emptyDir:
+            medium: ""
+          name: "storage"
 ---
 apiVersion: v1
 kind: Service

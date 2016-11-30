@@ -85,7 +85,7 @@ spec:
           hostPath:
             path: /srv/configs/acme/acme.json
       containers:
-        - image: containous/traefik:k8s
+        - image: containous/traefik:experimental
           name: traefik-ingress-lb
           imagePullPolicy: Always
           volumeMounts:
